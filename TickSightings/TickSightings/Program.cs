@@ -1,5 +1,5 @@
 
-namespace WebApplication1
+namespace TickSightings
 {
     public class Program
     {
@@ -10,8 +10,6 @@ namespace WebApplication1
             // Add services to the container.
 
             builder.Services.AddControllers();
-
-            builder.Services.AddEndpointsApiExplorer();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
@@ -22,7 +20,6 @@ namespace WebApplication1
             {
                 app.MapOpenApi();
                 app.UseSwaggerUI(o => o.SwaggerEndpoint("/openapi/v1.json", "v1"));
-            //    app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();

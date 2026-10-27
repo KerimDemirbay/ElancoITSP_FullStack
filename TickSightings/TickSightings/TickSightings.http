@@ -1,0 +1,6 @@
+@TickSightings_HostAddress = http://localhost:5105
+
+GET {{TickSightings_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
