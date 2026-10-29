@@ -22,7 +22,8 @@ namespace TickSightings
                 client.BaseAddress = new Uri(elancoBaseUrl);
             })
             .AddStandardResilienceHandler();
-
+            builder.Services.AddSingleton<SightingStore>();
+            builder.Services.AddHostedService<SightingRefreshService>();
             var app = builder.Build();
 
             app.UseExceptionHandler();
