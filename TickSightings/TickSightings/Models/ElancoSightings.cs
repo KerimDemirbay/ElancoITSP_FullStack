@@ -1,6 +1,6 @@
 ﻿namespace TickSightings.Models;
 
-public record class ElancoSighting(
+public record ElancoSighting(
     string? Id,
     string? Date,
     string? Location,
