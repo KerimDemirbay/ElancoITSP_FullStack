@@ -14,7 +14,6 @@ public class SightingEntity
 
     //Only filled in for community reports 
     public string? Notes { get; set; }
-    public string? ImagePath { get; set; }
 
     public static SightingEntity FromSighting(Sighting sighting) => new()
     {
@@ -27,5 +26,5 @@ public class SightingEntity
         Source = sighting.Source,
     };
 
-    public Sighting ToSighting() => new(Id, Date, City, Region, Species, LatinName, Source);
+    public Sighting ToSighting() => new(Id, Date, City, Region, Species, LatinName, Source, Notes);
 }

@@ -7,5 +7,6 @@ public record Sighting(
     string Region,
     string Species,
     string LatinName,
-    string Source
+    string Source,
+    string? Notes = null
 );

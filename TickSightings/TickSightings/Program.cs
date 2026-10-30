@@ -34,6 +34,7 @@ namespace TickSightings
             builder.Services.AddHostedService<SightingRefreshService>();
             builder.Services.AddScoped<SightingQueryService>();
             builder.Services.AddScoped<ReportService>();
+            builder.Services.AddScoped<SightingSubmissionService>();
 
             var app = builder.Build();
 

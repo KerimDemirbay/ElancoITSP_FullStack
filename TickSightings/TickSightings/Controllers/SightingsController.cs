@@ -6,7 +6,7 @@ namespace TickSightings.Controllers;
 
 [ApiController]
 [Route("api/sightings")]
-public class SightingsController(SightingQueryService queries) : ControllerBase
+public class SightingsController(SightingQueryService queries, SightingSubmissionService submissions) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<SightingSearchResponse>> Search(
@@ -34,6 +34,15 @@ public class SightingsController(SightingQueryService queries) : ControllerBase
             return NotFound();
 
         return sighting;
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<SightingSubmissionResponse>> Submit(
+    [FromBody] SightingSubmission submission, CancellationToken cancellationToken)
+    {
+        var result = await submissions.SubmitAsync(submission, cancellationToken);
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Sighting.Id }, result);
     }
 
     private ObjectResult DataNotReady() =>
