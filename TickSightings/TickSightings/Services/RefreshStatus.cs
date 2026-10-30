@@ -1,17 +1,18 @@
 ﻿using TickSightings.Models;
+
 namespace TickSightings.Services;
 
-public class SightingStore
+public class RefreshStatus
 {
-    private volatile DataSnapshot? _current;
+    private volatile RefreshSuccess? _lastSuccess;
     private volatile RefreshFailure? _lastFailure;
 
-    public DataSnapshot? Current => _current;
+    public RefreshSuccess? LastSuccess => _lastSuccess;
     public RefreshFailure? LastFailure => _lastFailure;
 
-    public void ReplaceData(DataSnapshot snapshot)
+    public void RecordSuccess(RefreshSuccess success)
     {
-        _current = Current;
+        _lastSuccess = success;
         _lastFailure = null;
     }
 

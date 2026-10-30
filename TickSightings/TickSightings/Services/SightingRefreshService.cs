@@ -1,20 +1,16 @@
-﻿using TickSightings.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using TickSightings.Database;
+using TickSightings.Models;
 
 namespace TickSightings.Services;
 
 public class SightingRefreshService(
-//this service is a singleton, so it must not hold a short-lived HttpClient
-//factory decides when to drop client, and make a new one
     IServiceScopeFactory scopeFactory,
-//store results
-    SightingStore store,
-//appsettings
+    RefreshStatus status,
     IConfiguration configuration,
-//writes to console
-    ILogger<SightingRefreshService> logger
-    ) : BackgroundService //runs for the apps entire life
+    ILogger<SightingRefreshService> logger) : BackgroundService
 {
-    private static readonly TimeSpan RetryWhenEmpty = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan RetryAfterFailure = TimeSpan.FromMinutes(1);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -24,8 +20,7 @@ public class SightingRefreshService(
         {
             await RefreshAsync(stoppingToken);
 
-            var delay = store.Current is null ? RetryWhenEmpty : refreshInterval;
-        //as to not stop a thread. Throws an expected OperationCancelled exeception and ends waiting loop cleanly
+            var delay = status.LastFailure is not null ? RetryAfterFailure : refreshInterval;
             await Task.Delay(delay, stoppingToken);
         }
     }
@@ -34,27 +29,46 @@ public class SightingRefreshService(
     {
         try
         {
-        //new scope per refresh = fresh ElancoApiClient from the factory
-        //scope disposed when the method ends
             using var scope = scopeFactory.CreateScope();
             var elanco = scope.ServiceProvider.GetRequiredService<ElancoApiClient>();
+            var db = scope.ServiceProvider.GetRequiredService<TickSightingsDbContext>();
 
             var raw = await elanco.GetAllSightingsAsync(stoppingToken);
             var result = SightingCleaner.Clean(raw, DateTime.Now);
 
-            store.ReplaceData(new DataSnapshot(result.Sightings, result.Report, DateTimeOffset.UtcNow));
+            if (result.Sightings.Count == 0)
+                throw new InvalidOperationException("Elanco returned no valid sightings, so the existing data was kept.");
 
-            logger.LogInformation("Refreshed sightings from Elanco: {Accepted} of {Received} accepted",
+            await ReplaceElancoSightingsAsync(db, result.Sightings, stoppingToken);
+
+            status.RecordSuccess(new RefreshSuccess(DateTimeOffset.UtcNow, result.Report));
+
+            logger.LogInformation("Synced sightings from Elanco: {Accepted} of {Received} accepted",
                 result.Report.Accepted, result.Report.Received);
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            // Thrown exception when the app is shutdown. 
+            // The app is shutting down. Not an error, so nothing to record.
         }
         catch (Exception ex)
         {
-            store.RecordFailure(new RefreshFailure(DateTimeOffset.UtcNow, ex.Message));
-            logger.LogError(ex, "Refreshing sightings from Elanco failed. Keeping the previous data");
+            status.RecordFailure(new RefreshFailure(DateTimeOffset.UtcNow, ex.Message));
+            logger.LogError(ex, "Syncing sightings from Elanco failed. Keeping the existing data");
         }
+    }
+
+    private static async Task ReplaceElancoSightingsAsync(
+        TickSightingsDbContext db, IReadOnlyList<Sighting> sightings, CancellationToken cancellationToken)
+    {
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+
+        await db.Sightings
+            .Where(s => s.Source == "Elanco")
+            .ExecuteDeleteAsync(cancellationToken);
+
+        db.Sightings.AddRange(sightings.Select(SightingEntity.FromSighting));
+        await db.SaveChangesAsync(cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
     }
 }

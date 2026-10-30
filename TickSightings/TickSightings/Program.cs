@@ -1,4 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using TickSightings.Database;
 using TickSightings.Services;
+
 namespace TickSightings
 {
     public class Program
@@ -8,23 +11,38 @@ namespace TickSightings
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
             builder.Services.AddProblemDetails();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             var elancoBaseUrl = builder.Configuration["ElancoApi:BaseUrl"]
-            ?? throw new InvalidOperationException("ElancoApi:BaseUrl is either missing from appsettings.json or is wrong");
+                ?? throw new InvalidOperationException("ElancoApi:BaseUrl is missing from appsettings.json");
 
             builder.Services.AddHttpClient<ElancoApiClient>(client =>
             {
                 client.BaseAddress = new Uri(elancoBaseUrl);
             })
             .AddStandardResilienceHandler();
-            builder.Services.AddSingleton<SightingStore>();
+
+            var connectionString = builder.Configuration.GetConnectionString("TickSightings")
+                ?? throw new InvalidOperationException("ConnectionStrings:TickSightings is missing from appsettings.json");
+
+            builder.Services.AddDbContext<TickSightingsDbContext>(options =>
+                options.UseSqlite(connectionString));
+
+            builder.Services.AddSingleton<RefreshStatus>();
             builder.Services.AddHostedService<SightingRefreshService>();
+            builder.Services.AddScoped<SightingQueryService>();
+
             var app = builder.Build();
+
+            // Create the database file and tables on first run.
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<TickSightingsDbContext>();
+                db.Database.EnsureCreated();
+                db.Database.ExecuteSqlRaw("PRAGMA journal_mode=WAL;");
+            }
 
             app.UseExceptionHandler();
             app.UseStatusCodePages();
@@ -37,10 +55,7 @@ namespace TickSightings
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();

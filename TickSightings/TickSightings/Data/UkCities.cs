@@ -27,7 +27,10 @@ public static class UkCities
     ];
 
     public static IReadOnlyList<CityInfo> All => AllCities;
+    public static IEnumerable<string> Regions => AllCities.Select(c => c.Region).Distinct();
 
+    public static string? FindRegion(string? region) =>
+    Regions.FirstOrDefault(r => r.Equals(region?.Trim(), StringComparison.OrdinalIgnoreCase));
     public static CityInfo? Find(string? name) =>
     AllCities.FirstOrDefault(c => c.Name.Equals(name?.Trim(), StringComparison.OrdinalIgnoreCase));
 }

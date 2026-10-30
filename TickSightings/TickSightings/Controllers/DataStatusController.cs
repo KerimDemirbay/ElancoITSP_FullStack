@@ -6,18 +6,19 @@ namespace TickSightings.Controllers;
 
 [ApiController]
 [Route("api/data-status")]
-public class DataStatusController(SightingStore store) : ControllerBase
+public class DataStatusController(SightingQueryService queries, RefreshStatus status) : ControllerBase
 {
     [HttpGet]
-    public ActionResult<DataStatusResponse> Get()
+    public async Task<ActionResult<DataStatusResponse>> Get(CancellationToken cancellationToken)
     {
-        var current = store.Current;
+        var sightingCount = await queries.CountAllAsync(cancellationToken);
+        var lastSuccess = status.LastSuccess;
 
         return new DataStatusResponse(
-            IsReady: current is not null,
-            LastRefreshedAt: current?.RefreshedAt,
-            SightingCount: current?.Sightings.Count ?? 0,
-            Quality: current?.Report,
-            LastFailure: store.LastFailure);
+            IsReady: sightingCount > 0,
+            LastRefreshedAt: lastSuccess?.RefreshedAt,
+            SightingCount: sightingCount,
+            Quality: lastSuccess?.Report,
+            LastFailure: status.LastFailure);
     }
 }
