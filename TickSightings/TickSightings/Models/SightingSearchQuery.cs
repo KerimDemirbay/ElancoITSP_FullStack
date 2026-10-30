@@ -7,7 +7,6 @@ public class SightingSearchQuery : SightingFilter
     [Range(1, int.MaxValue)]
     public int Page { get; init; } = 1;
 
-    //limits query to 200 rows
-    [Range(1, 200)]
-    public int PageSize { get; init; } = 50;
+    [Range(1, 1_000_000)]
+    public int PageSize { get; init; } = 1;
 }
