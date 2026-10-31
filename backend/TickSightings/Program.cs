@@ -55,9 +55,7 @@ namespace TickSightings
                 app.MapOpenApi();
                 app.UseSwaggerUI(o => o.SwaggerEndpoint("/openapi/v1.json", "v1"));
             }
-
-            app.UseHttpsRedirection();
-            app.UseAuthorization();
+          
             app.MapControllers();
 
             app.Run();
