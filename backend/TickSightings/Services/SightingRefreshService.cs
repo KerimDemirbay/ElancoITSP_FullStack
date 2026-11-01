@@ -26,7 +26,11 @@ public class SightingRefreshService(
             {
                 await Task.Delay(delay, stoppingToken);
             }
-            catch { }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                //the app is shutting down while waiting for the next refresh, so stop the loop
+                break;
+            }
 
         }
     }

@@ -15,7 +15,7 @@ const species: SpeciesGuide[] = [
         latinName: 'Ixodes apronophorus',
         habitat: 'Wetlands. Only recorded in a few places, such as Kent, the Norfolk Broads and Wicken Fen.',
         feedsOn: 'Water voles.',
-        image: '/tick-images/Marsh-Tick.jpg',
+        image: null,
     },
     {
         name: 'Southern rodent tick',
