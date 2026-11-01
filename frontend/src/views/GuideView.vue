@@ -30,6 +30,7 @@ const species: SpeciesGuide[] = [
         habitat: 'The ground under places where birds roost. Recorded in England and, more recently, Wales.',
         feedsOn: 'Birds, especially perching birds. Sometimes found feeding on people.',
         image: '/tick-images/Passerine-Tick.jpg',
+        note: 'The Elanco data lists this species as "Dermacentor frontalis".',
     },
     {
         name: 'Fox/badger tick',

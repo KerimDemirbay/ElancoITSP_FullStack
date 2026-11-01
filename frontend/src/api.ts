@@ -97,3 +97,46 @@ export function getCityReports(filter: SightingFilter): Promise<CityReport[]> {
 export function getSpecies(): Promise<SpeciesInfo[]> {
     return request<SpeciesInfo[]>('/reference/species')
 }
+
+export interface CityInfo {
+    name: string
+    region: string
+    latitude: number
+    longitude: number
+}
+
+export interface Sighting {
+    id: string
+    date: string
+    city: string
+    region: string
+    species: string
+    latinName: string
+    source: string
+    notes: string | null
+}
+
+//report stuff
+export interface SightingSubmission {
+    date: string
+    city: string
+    species: string
+    notes: string
+}
+
+export interface SightingSubmissionResponse {
+    sighting: Sighting
+    warnings: string[]
+}
+
+export function getCities(): Promise<CityInfo[]> {
+    return request<CityInfo[]>('/reference/cities')
+}
+
+export function submitSighting(submission: SightingSubmission): Promise<SightingSubmissionResponse> {
+    return request<SightingSubmissionResponse>('/sightings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submission),
+    })
+}

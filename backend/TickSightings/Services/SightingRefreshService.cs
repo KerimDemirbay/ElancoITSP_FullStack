@@ -21,7 +21,13 @@ public class SightingRefreshService(
             await RefreshAsync(stoppingToken);
 
             var delay = status.LastFailure is not null ? RetryAfterFailure : refreshInterval;
-            await Task.Delay(delay, stoppingToken);
+            
+            try
+            {
+                await Task.Delay(delay, stoppingToken);
+            }
+            catch { }
+
         }
     }
 

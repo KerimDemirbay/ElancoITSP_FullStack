@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { ApiError, getCityReports, getSpecies, type CityReport, type SpeciesInfo } from '@/api'
 import TickMap from '@/components/TickMap.vue'
 import MapFilters from '@/components/MapFilters.vue'
 import PostcodeSearch from '@/components/PostcodeSearch.vue'
 import CitySidebar from '@/components/CitySidebar.vue'
+
+const route = useRoute() 
 
 //the earliest date the filters accept (the same rule the API uses for new reports)
 //first 10 chars of toISOString() gives UTC date, ex: "2026-10-31T19:55:00.000Z"

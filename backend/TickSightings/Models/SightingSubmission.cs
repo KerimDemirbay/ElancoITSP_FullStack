@@ -34,7 +34,7 @@ public class SightingSubmission :IValidatableObject
                 $"Unknown Species '{Species}'. If you wish to add a tick of new species please contact us. Valid species: {string.Join(", ", TickSpecies.All.Select(s => s.Name))}.",
                 [nameof(Species)]);
 
-        if (TickSpecies.Find(City) is null)
+        if (UkCities.Find(City) is null)
             yield return new ValidationResult(
                 $"Unknown city '{City}'. Valid cities: {string.Join(", ", UkCities.All.Select(c => c.Name))}.",
                 [nameof(City)]);

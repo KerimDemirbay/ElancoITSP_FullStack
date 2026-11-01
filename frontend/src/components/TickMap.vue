@@ -25,9 +25,9 @@ const MAX_RADIUS = 24
 const YELLOW = { r: 250, g: 204, b: 21 }
 const DARK_RED = { r: 153, g: 27, b: 27 }
 
-// Leaflet's default pin images don't load properly
+// Leaflet's default pin images don't load properly because it wants the path from its CSS
+// Vite ending up bundling and renaming those images, thus wrong path
 // so we import the image files and build the icon ourselves
-// probably because of vite
 const pinIcon = L.icon({
     iconUrl: markerIcon,
     iconRetinaUrl: markerIcon2x,
