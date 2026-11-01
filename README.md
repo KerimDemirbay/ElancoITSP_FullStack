@@ -58,23 +58,59 @@ Open http://localhost:5173.
 Vite forwards every /api request to the backend, so both run without any CORS setup.
 
 # Technical choices
-### Choice +	Why
 
 Because most of this project was based on my old repo, the tech stack remained largely the same.
 
-ASP.NET Core Web API (.NET 10) is the current long-term support release, as .NET 8 will reach End of Life on November 10th 2026. .NET 10 offers controllers, built-in validation and ProblemDetails give consistent errors with little code.
+### ASP.NET Core Web API (.NET 10):
+.NET 10 is the current long-term support release, as .NET 8 will reach end of life on 10 November 2026. It offers controllers, built-in validation and ProblemDetails, which give consistent errors with little code.
 
-SQLite + EF Core was used as the data needs to be filtered, grouped and paged. A database does that in SQL with indexes instead of loading everything into memory, so it scales to much larger datasets. SQLite is a single file, so there's nothing extra to install.
+### SQLite + EF Core:
+the data needs to be filtered, grouped and paged. A database does that in SQL with indexes instead of loading everything into memory, so it scales to much larger datasets. SQLite is a single file, so there's nothing extra to install.
 
-Background refresh service was used as data is downloaded on start-up and then every 30 minutes (configurable in appsettings.json), so requests never wait on the Elanco API. A failed refresh is retried after 1 minute, and the last good data stays available, which is something that isn't achievable with a snapshot approach for example.
+### Background refresh service:
+data is downloaded on start-up and then every 30 minutes (configurable in appsettings.json), so requests never wait on the Elanco API. A failed refresh is retried after 1 minute, and the last good data stays available. Because the data is stored in the database rather than in memory, it also survives a restart.
 
-Microsoft.Extensions.Http.Resilience calls to the Elanco API get retries with backoff, timeouts and a circuit breaker. Provides great utility for zero implementation cost.
+### Microsoft.Extensions.Http.Resilience:
+calls to the Elanco API get retries with backoff, timeouts and a circuit breaker. It provides great utility for zero implementation cost.
 
-Vue 3 + TypeScript + Vite are the same frontend stack as last year's repo, now with TypeScript types that match the API's JSON.
+### Vue 3 + TypeScript + Vite:
+the same frontend stack as last year's repo, now with TypeScript types that match the API's JSON.
 
-Leaflet + OpenStreetMap tiles are the same as last year's repo. The map is shown in greyscale so its own road colours don't clash with the yellow-to-red scale. Pins and circles were chosen, not a heatmap	as the data only gives a city for each sighting, not an exact location. A heatmap or boundary shading would suggest more precision in data.
+### Leaflet + OpenStreetMap tiles:
+the same as last year's repo. The map is shown in greyscale so its own road colours don't clash with the yellow-to-red scale.
+
+### Pins and circles (not a heatmap):
+the data only gives a city for each sighting, not an exact location. A heatmap or boundary shading would suggest more precision than the data has.
+
+# How the data is handled
+
+SightingCleaner checks every record from the Elanco API.
+
+### Rejected and counted by reason:
+missing id;
+
+missing or invalid date;
+
+a date in the future;
+
+an unknown location;
+
+an unknown species;
+
+a duplicate id;
+
+duplicate content (same date, city and species under a different id).
+### Repaired:
+names are matched without caring about case or extra spaces;
+
+a species is identified from its Latin name when the common name is missing.
 
 
+>The counts are available at GET /api/data-status.
+
+On each refresh, the Elanco rows are replaced inside a database transaction, so a failed refresh can't leave half-written data. Community reports are stored separately and are kept.
+
+Data note: the Elanco data gives the passerine tick's Latin name as Dermacentor frontalis. The UK Health Security Agency lists it as Ixodes frontalis. The backend keeps the API's value so records still match, and the species guide shows the UKHSA name with a note.
 
 >Credits
 >
