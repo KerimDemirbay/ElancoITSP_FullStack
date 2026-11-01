@@ -10,7 +10,6 @@ namespace TickSightings
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddProblemDetails();
             builder.Services.AddOpenApi();
@@ -38,7 +37,7 @@ namespace TickSightings
 
             var app = builder.Build();
 
-            // Create the database file and tables on first run.
+            //create the database file and tables on first run
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<TickSightingsDbContext>();

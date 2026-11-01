@@ -1,4 +1,4 @@
-// Types that match the JSON the C# API returns.
+//interface to match the record classes in C#
 export interface DataQualityReport {
     received: number
     accepted: number
@@ -18,7 +18,6 @@ export interface DataStatus {
     lastFailure: RefreshFailure | null
 }
 
-// The ProblemDetails JSON the API sends back for every error.
 export interface ProblemDetails {
     title?: string
     detail?: string
@@ -50,4 +49,51 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function getDataStatus(): Promise<DataStatus> {
     return request<DataStatus>('/data-status')
+}
+
+export interface SpeciesCount {
+    species: string
+    count: number
+}
+
+export interface CityReport {
+    city: string
+    region: string
+    latitude: number
+    longitude: number
+    count: number
+    latestSighting: string | null
+    species: SpeciesCount[]
+}
+
+export interface SpeciesInfo {
+    name: string
+    latinName: string
+}
+
+export interface SightingFilter {
+    from?: string
+    to?: string
+    city?: string
+    region?: string
+    species?: string
+}
+
+function toQueryString(filter: SightingFilter): string {
+    const params = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(filter)) {
+        if (value) params.set(key, value)
+    }
+
+    const query = params.toString()
+    return query ? `?${query}` : ''
+}
+
+export function getCityReports(filter: SightingFilter): Promise<CityReport[]> {
+    return request<CityReport[]>(`/reports/by-city${toQueryString(filter)}`)
+}
+
+export function getSpecies(): Promise<SpeciesInfo[]> {
+    return request<SpeciesInfo[]>('/reference/species')
 }

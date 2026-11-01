@@ -12,7 +12,7 @@ public class SightingEntity
     public required string LatinName { get; set; }
     public required string Source { get; set; }
 
-    //Only filled in for community reports 
+    //only filled in for community reports 
     public string? Notes { get; set; }
 
     public static SightingEntity FromSighting(Sighting sighting) => new()

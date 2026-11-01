@@ -48,7 +48,7 @@ public class SightingRefreshService(
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            // The app is shutting down. Not an error, so nothing to record.
+            //the app is shutting down, not an error, so nothing to record
         }
         catch (Exception ex)
         {
