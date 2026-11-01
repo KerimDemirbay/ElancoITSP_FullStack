@@ -2,6 +2,8 @@
 
 An MVP full-stack web app for exploring and reporting tick sightings in UK cities, built for the Elanco pre-interview task.
 
+link to the video walk through! https://www.youtube.com/watch?v=8MzRC9Dfe3U
+
 Backend: ASP.NET Core (.NET 10) Web API with EF Core and SQLite.
 Frontend: Vue + TypeScript + Vite, with a Leaflet map.
 
