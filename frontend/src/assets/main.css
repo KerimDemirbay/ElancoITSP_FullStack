@@ -8,12 +8,6 @@
     --fern: #2e6b4e; /* links, buttons, focus */
     --gorse: #9a6f00; /* warnings */
     --bramble: #8e2c3a; /* errors */
-    /* one colour per species */
-    --species-marsh: #2b7a9e;
-    --species-rodent: #5e6b2e;
-    --species-passerine: #c99a10;
-    --species-fox-badger: #b5562b;
-    --species-tree-hole: #5d4a86;
     /* Type */
     --font-display: 'Alegreya', Georgia, serif;
     --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;

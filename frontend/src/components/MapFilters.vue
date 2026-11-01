@@ -48,13 +48,15 @@ function reset() {
                        :aria-invalid="dateError !== ''" />
             </div>
 
-            <label for="filter-to">To</label>
-            <input id="filter-to"
-                   v-model="to"
-                   type="date"
-                   :min="minDate"
-                   :max="maxDate"
-                   :aria-invalid="dateError !== ''" />
+            <div class="field">
+                <label for="filter-to">To</label>
+                <input id="filter-to"
+                       v-model="to"
+                       type="date"
+                       :min="minDate"
+                       :max="maxDate"
+                       :aria-invalid="dateError !== ''" />
+            </div>
 
             <div class="field">
                 <label for="filter-species">Species</label>

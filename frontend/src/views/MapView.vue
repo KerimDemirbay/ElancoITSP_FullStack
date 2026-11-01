@@ -71,14 +71,21 @@ async function loadCities() {
     }
 }
 
-onMounted(async () => {
-    loadCities()
-
+async function loadSpecies() {
     try {
         speciesOptions.value = await getSpecies()
     } catch {
-        //map still works without the species list, the dropdown just shows "All species"
+        // The map still works without the species list; the dropdown just shows "All species".
     }
+}
+
+onMounted(async () => {
+    loadSpecies()
+    await loadCities()
+
+    // A shared link like /?city=Leeds opens that city straight away.
+    const sharedCity = route.query.city
+    if (typeof sharedCity === 'string') selectCity(sharedCity)
 })
 
 watch([from, to, species], loadCities)

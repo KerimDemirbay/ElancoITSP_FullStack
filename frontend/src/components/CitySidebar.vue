@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { CityReport } from '@/api'
 
 const props = defineProps<{
@@ -10,6 +10,47 @@ const props = defineProps<{
 const emit = defineEmits<{
     close: []
 }>()
+
+const shareMessage = ref('')
+
+//Google Maps opens directions from wherever the user is to the cities centre
+const directionsUrl = computed(() => {
+    if (!props.city) return ''
+    return `https://www.google.com/maps/dir/?api=1&destination=${props.city.latitude},${props.city.longitude}`
+})
+
+//clear "Link copied." when a different city is opened
+watch(
+    () => props.city?.city,
+    () => {
+        shareMessage.value = ''
+    },
+)
+
+async function share() {
+    if (!props.city) return
+
+    //link back to this site that opens the same city (MapView reads ?city= when it loads)
+    const url = `${window.location.origin}/?city=${encodeURIComponent(props.city.city)}`
+
+    // Phones, and some desktop browsers, have a built-in share menu.
+    if (navigator.share) {
+        try {
+            await navigator.share({ title: `Tick sightings in ${props.city.city}`, url })
+        } catch {
+            //when user closes the menu
+        }
+        return
+    }
+
+    // Everywhere else, copy the link instead.
+    try {
+        await navigator.clipboard.writeText(url)
+        shareMessage.value = 'Link copied.'
+    } catch {
+        shareMessage.value = `Couldn't copy the link. Here it is: ${url}`
+    }
+}
 
 const latestSighting = computed(() => {
     if (!props.city?.latestSighting) return 'None for these filters'
@@ -41,6 +82,12 @@ const latestSighting = computed(() => {
                     <dd>{{ latestSighting }}</dd>
                 </div>
             </dl>
+
+            <div class="actions">
+                <a class="button" :href="directionsUrl" target="_blank" rel="noopener">Get directions</a>
+                <button type="button" class="button button--quiet" @click="share">Share</button>
+            </div>
+            <p v-if="shareMessage" class="share-message">{{ shareMessage }}</p>
 
             <h3>Species seen here</h3>
             <p v-if="city.species.length === 0">No sightings match the current filters.</p>
@@ -123,6 +170,22 @@ const latestSighting = computed(() => {
             font-size: 1.35rem;
             font-weight: 700;
         }
+
+    .actions {
+        display: flex;
+        gap: var(--space-2);
+        margin: 0 0 var(--space-4);
+    }
+
+        .actions a {
+            text-decoration: none;
+        }
+
+    .share-message {
+        margin: calc(-1 * var(--space-3)) 0 var(--space-4);
+        font-size: var(--text-small);
+        color: var(--moss-soft);
+    }
 
     .species {
         list-style: none;
